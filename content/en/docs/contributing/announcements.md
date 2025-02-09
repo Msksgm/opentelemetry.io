@@ -10,7 +10,7 @@ dates (future or expired), internationalization, and more, to automatically show
 or hide banners depending on the build date, determine banner ordering, handle
 fall back to English banners, etc.
 
-> Announcements are currently used as banners only. We _might_ eventually
+> Announcements are currently used as banners only. hoge _might_ eventually
 > support slightly more general announcements as well.
 
 ### Creating an announcement
