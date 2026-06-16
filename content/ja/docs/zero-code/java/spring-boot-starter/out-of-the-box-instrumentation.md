@@ -1,8 +1,7 @@
 ---
 title: すぐに使える計装
 weight: 40
-default_lang_commit: 276d7eb3f936deef6487cdd2b1d89822951da6c8
-drifted_from_default: true
+default_lang_commit: 2d89b60b2e09d42ba96757b0afdbc31f54a2b0e7
 cSpell:ignore: webflux webmvc
 ---
 
@@ -11,52 +10,206 @@ cSpell:ignore: webflux webmvc
 
 いくつかのフレームワークに対して、すぐに使える計装が利用可能です。
 
-| 機能                     | プロパティ                                      | デフォルト値 |
-| ------------------------ | ----------------------------------------------- | ------------ |
-| JDBC                     | `otel.instrumentation.jdbc.enabled`             | true         |
-| Logback                  | `otel.instrumentation.logback-appender.enabled` | true         |
-| Logback MDC              | `otel.instrumentation.logback-mdc.enabled`      | true         |
-| Spring Web               | `otel.instrumentation.spring-web.enabled`       | true         |
-| Spring Web MVC           | `otel.instrumentation.spring-webmvc.enabled`    | true         |
-| Spring WebFlux           | `otel.instrumentation.spring-webflux.enabled`   | true         |
-| Kafka                    | `otel.instrumentation.kafka.enabled`            | true         |
-| MongoDB                  | `otel.instrumentation.mongo.enabled`            | true         |
-| Micrometer               | `otel.instrumentation.micrometer.enabled`       | false        |
-| R2DBC (リアクティブJDBC) | `otel.instrumentation.r2dbc.enabled`            | true         |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+| 機能                     | プロパティ                                      | デフォルト |
+| ------------------------ | ----------------------------------------------- | ---------- |
+| JDBC                     | `otel.instrumentation.jdbc.enabled`             | true       |
+| Logback                  | `otel.instrumentation.logback-appender.enabled` | true       |
+| Logback MDC              | `otel.instrumentation.logback-mdc.enabled`      | true       |
+| Spring Web               | `otel.instrumentation.spring-web.enabled`       | true       |
+| Spring Web MVC           | `otel.instrumentation.spring-webmvc.enabled`    | true       |
+| Spring WebFlux           | `otel.instrumentation.spring-webflux.enabled`   | true       |
+| Kafka                    | `otel.instrumentation.kafka.enabled`            | true       |
+| MongoDB                  | `otel.instrumentation.mongo.enabled`            | true       |
+| Micrometer               | `otel.instrumentation.micrometer.enabled`       | false      |
+| R2DBC (Reactive JDBC) | `otel.instrumentation.r2dbc.enabled`            | true       |
+
+特定の計装を無効にするには、次のようにします。
+
+```yaml
+otel:
+  instrumentation:
+    logback-appender:
+      enabled: false
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+[宣言的設定](../declarative-configuration/)では、計装の有効化または無効化は`otel.distribution.spring_starter.instrumentation`配下の一元化されたリストを使用します。
+計装名は`-`（ケバブケース）ではなく`_`（スネークケース）を使用します。
+
+| 機能                     | 名前               | デフォルト |
+| ------------------------ | ------------------ | ---------- |
+| JDBC                     | `jdbc`             | enabled    |
+| Logback                  | `logback_appender` | enabled    |
+| Logback MDC              | `logback_mdc`      | enabled    |
+| Spring Web               | `spring_web`       | enabled    |
+| Spring Web MVC           | `spring_webmvc`    | enabled    |
+| Spring WebFlux           | `spring_webflux`   | enabled    |
+| Kafka                    | `kafka`            | enabled    |
+| MongoDB                  | `mongo`            | enabled    |
+| Micrometer               | `micrometer`       | disabled   |
+| R2DBC (Reactive JDBC) | `r2dbc`            | enabled    |
+
+特定の計装を無効にするには、次のように書きます。
+
+```yaml
+otel:
+  distribution:
+    spring_starter:
+      instrumentation:
+        disabled:
+          - logback_appender
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## 計装を選択的に有効化する {#turn-on-instrumentations-selectively}
 
-特定の計装のみを使用するには、まず`otel.instrumentation.common.default-enabled`プロパティを`false`に設定してすべての計装をオフにします。
-その後、計装を1つずつ有効にします。
+{{< tabpane text=true >}} {{% tab "Properties" %}}
 
-たとえば、JDBC計装のみを有効にしたい場合は、`otel.instrumentation.jdbc.enabled`を`true`に設定します。
+特定の計装のみを使用するには、まずすべての計装をオフにしてから、計装を1つずつ有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    common:
+      default-enabled: false
+    jdbc:
+      enabled: true
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+[宣言的設定](../declarative-configuration/)では、`default_enabled`を`false`に設定し、使用したい計装を`enabled`にリストします。
+
+```yaml
+otel:
+  distribution:
+    spring_starter:
+      instrumentation:
+        default_enabled: false
+        enabled:
+          - jdbc
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## 共通計装設定 {#common-instrumentation-configuration}
 
 すべてのデータベース計装に共通のプロパティ。
 
-| システムプロパティ                                           | 型      | デフォルト | 説明                                         |
-| ------------------------------------------------------------ | ------- | ---------- | -------------------------------------------- |
-| `otel.instrumentation.common.db-statement-sanitizer.enabled` | Boolean | true       | DBステートメントのサニタイズを有効にします。 |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+すべてのデータベース計装に対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    common:
+      db-statement-sanitizer:
+        enabled: true # default: true
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+すべてのデータベース計装に対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      common:
+        database:
+          statement_sanitizer:
+            enabled: true
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## JDBC計装 {#jdbc-instrumentation}
 
-| システムプロパティ                                      | 型      | デフォルト | 説明                                         |
-| ------------------------------------------------------- | ------- | ---------- | -------------------------------------------- |
-| `otel.instrumentation.jdbc.statement-sanitizer.enabled` | Boolean | true       | DBステートメントのサニタイズを有効にします。 |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+JDBCに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    jdbc:
+      statement-sanitizer:
+        enabled: true # default: true
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+JDBCに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      jdbc:
+        statement_sanitizer:
+          enabled: true
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## Logback {#logback}
 
 システムプロパティで実験的機能を有効にして、属性をキャプチャできます。
 
-| システムプロパティ                                                                     | 型      | デフォルト | 説明                                                                                                                                                                                               |
-| -------------------------------------------------------------------------------------- | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `otel.instrumentation.logback-appender.experimental-log-attributes`                    | Boolean | false      | 実験的なログ属性`thread.name`と`thread.id`のキャプチャを有効にします。                                                                                                                             |
-| `otel.instrumentation.logback-appender.experimental.capture-code-attributes`           | Boolean | false      | [ソースコード属性][source code attributes]のキャプチャを有効にします。ログサイトでソースコード属性をキャプチャすると、パフォーマンスのオーバーヘッドが発生する可能性があることに注意してください。 |
-| `otel.instrumentation.logback-appender.experimental.capture-marker-attribute`          | Boolean | false      | Logbackマーカーを属性としてキャプチャすることを有効にします。                                                                                                                                      |
-| `otel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes` | Boolean | false      | Logbackキーバリューペアを属性としてキャプチャすることを有効にします。                                                                                                                              |
-| `otel.instrumentation.logback-appender.experimental.capture-logger-context-attributes` | Boolean | false      | Logbackロガーコンテキストプロパティを属性としてキャプチャすることを有効にします。                                                                                                                  |
-| `otel.instrumentation.logback-appender.experimental.capture-mdc-attributes`            | String  |            | キャプチャするMDC属性のカンマ区切りリスト。すべての属性をキャプチャするにはワイルドカード文字`*`を使用します。                                                                                     |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+| プロパティ                                       | 型      | デフォルト | 説明                                                                                                                                                                                               |
+| ------------------------------------------------ | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `experimental-log-attributes`                    | Boolean | false      | 実験的なログ属性`thread.name`と`thread.id`のキャプチャを有効にします。                                                                                                                             |
+| `experimental.capture-code-attributes`           | Boolean | false      | [ソースコード属性][source code attributes]のキャプチャを有効にします。ログサイトでソースコード属性をキャプチャすると、パフォーマンスのオーバーヘッドが発生する可能性があることに注意してください。 |
+| `experimental.capture-marker-attribute`          | Boolean | false      | Logbackマーカーを属性としてキャプチャすることを有効にします。                                                                                                                                      |
+| `experimental.capture-key-value-pair-attributes` | Boolean | false      | Logbackキーバリューペアを属性としてキャプチャすることを有効にします。                                                                                                                              |
+| `experimental.capture-logger-context-attributes` | Boolean | false      | Logbackロガーコンテキストプロパティを属性としてキャプチャすることを有効にします。                                                                                                                  |
+| `experimental.capture-mdc-attributes`            | String  |            | キャプチャするMDC属性のカンマ区切りリスト。すべての属性をキャプチャするにはワイルドカード文字`*`を使用します。                                                                                     |
+
+```yaml
+otel:
+  instrumentation:
+    logback-appender:
+      experimental-log-attributes: false
+      experimental:
+        capture-code-attributes: false
+        capture-marker-attribute: false
+        capture-key-value-pair-attributes: false
+        capture-logger-context-attributes: false
+        capture-mdc-attributes: '*'
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+| プロパティ                                      | 型      | デフォルト | 説明                                                                                                                                                                                               |
+| ----------------------------------------------- | ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `experimental_log_attributes/development`       | Boolean | false      | 実験的なログ属性`thread.name`と`thread.id`のキャプチャを有効にします。                                                                                                                             |
+| `capture_code_attributes/development`           | Boolean | false      | [ソースコード属性][source code attributes]のキャプチャを有効にします。ログサイトでソースコード属性をキャプチャすると、パフォーマンスのオーバーヘッドが発生する可能性があることに注意してください。 |
+| `capture_marker_attribute/development`          | Boolean | false      | Logbackマーカーを属性としてキャプチャすることを有効にします。                                                                                                                                      |
+| `capture_key_value_pair_attributes/development` | Boolean | false      | Logbackキーバリューペアを属性としてキャプチャすることを有効にします。                                                                                                                              |
+| `capture_logger_context_attributes/development` | Boolean | false      | Logbackロガーコンテキストプロパティを属性としてキャプチャすることを有効にします。                                                                                                                  |
+| `capture_mdc_attributes/development`            | String  |            | キャプチャするMDC属性のカンマ区切りリスト。すべての属性をキャプチャするにはワイルドカード文字`*`を使用します。                                                                                     |
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      logback_appender:
+        experimental_log_attributes/development: false
+        capture_code_attributes/development: false
+        capture_marker_attribute/development: false
+        capture_key_value_pair_attributes/development: false
+        capture_logger_context_attributes/development: false
+        capture_mdc_attributes/development: '*'
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 [source code attributes]: /docs/specs/semconv/general/attributes/#source-code-attributes
 
@@ -244,9 +397,30 @@ public class WebClientController {
 
 Kafkaクライアント計装の自動設定を提供します。
 
-| システムプロパティ                                        | 型      | デフォルト | 説明                                           |
-| --------------------------------------------------------- | ------- | ---------- | ---------------------------------------------- |
-| `otel.instrumentation.kafka.experimental-span-attributes` | Boolean | false      | 実験的なスパン属性のキャプチャを有効にします。 |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+Kafkaに対して実験的なスパン属性のキャプチャを有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    kafka:
+      experimental-span-attributes: false # default: false
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+Kafkaに対して実験的なスパン属性のキャプチャを有効にします。
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      kafka:
+        experimental_span_attributes/development: false
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## Micrometer計装 {#micrometer-instrumentation}
 
@@ -256,14 +430,60 @@ MicrometerからOpenTelemetryへのブリッジの自動設定を提供します
 
 MongoDBクライアント計装の自動設定を提供します。
 
-| システムプロパティ                                       | 型      | デフォルト | 説明                                         |
-| -------------------------------------------------------- | ------- | ---------- | -------------------------------------------- |
-| `otel.instrumentation.mongo.statement-sanitizer.enabled` | Boolean | true       | DBステートメントのサニタイズを有効にします。 |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+MongoDBに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    mongo:
+      statement-sanitizer:
+        enabled: true # default: true
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+MongoDBに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      mongo:
+        statement_sanitizer:
+          enabled: true
+```
+
+{{% /tab %}} {{< /tabpane >}}
 
 ## R2DBC計装 {#r2dbc-instrumentation}
 
 OpenTelemetry R2DBC計装の自動設定を提供します。
 
-| システムプロパティ                                       | 型      | デフォルト | 説明                                         |
-| -------------------------------------------------------- | ------- | ---------- | -------------------------------------------- |
-| `otel.instrumentation.r2dbc.statement-sanitizer.enabled` | Boolean | true       | DBステートメントのサニタイズを有効にします。 |
+{{< tabpane text=true >}} {{% tab "Properties" %}}
+
+R2DBCに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation:
+    r2dbc:
+      statement-sanitizer:
+        enabled: true # default: true
+```
+
+{{% /tab %}} {{% tab "Declarative Configuration" %}}
+
+R2DBCに対してDBステートメントのサニタイズを有効にします。
+
+```yaml
+otel:
+  instrumentation/development:
+    java:
+      r2dbc:
+        statement_sanitizer:
+          enabled: true
+```
+
+{{% /tab %}} {{< /tabpane >}}
